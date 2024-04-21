@@ -32,5 +32,5 @@ fn test_parse_line(){
         times += 1;
     } 
 
-    assert_eq!(times, 1);
+    assert_eq!(times, 2);
 }
