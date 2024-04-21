@@ -1,10 +1,10 @@
-# compilecmds
+# ccjson 
 
 ![license](https://img.shields.io/badge/license-MIT-orange)
 ![prs](https://img.shields.io/badge/PRs-welcome-brightgreen)
 ![poweredby](https://img.shields.io/badge/powered%20by-qufeiyan-red)
 
-> 实现一个命令行工具，以生成 compile_commands.json, 便于 `clangd` 识别, 搭配 `vscode` | `vim` 等编辑器以提供现代 `ide` 的智能提示代码补全等服务。
+> 实现一个命令行工具，以生成 compile_commands.json, 便于 `clangd` 识别, 搭配 `vscode` | `vim` 等编辑器以提供现代 `ide` 的智能提示、代码补全等服务。
 
 原项目由 [python3](https://github.com/qufeiyan/compilecmds) 实现, 虽然能满足自用, 且完美解决使用非标准 `make` 构建的 `c` 项目无法使用 `clangd` 的问题, 但是在离线环境下安装对应的 `python` 包依赖对不熟悉 `python` 的人来说并不是那么容易。本次实现的 `ccjson` 以 `rust` 重构, 直接生成二进制可执行程序，以解决工具安装问题。
 
