@@ -1,6 +1,6 @@
-use std::{fs::{self, File}, io::{self, Read}};
+use std::{fs::{self, File}, io::Read};
 
-use ccjson::writer::{self, Writer};
+use ccjson::writer::Writer;
 
 
 #[test]

@@ -83,8 +83,8 @@ impl Parser{
     /// 
     /// ``` 
     fn parser_command(&mut self, str: &String) -> Option<String> {
-        let mut iter = str.split_whitespace();
-        let iter_copy = iter.clone();
+        let mut iter = str.split_whitespace().into_iter();
+        let mut iter_copy = iter.clone();
 
         let res_cc = iter.find(|s|{
             s.ends_with("gcc") 
@@ -107,10 +107,14 @@ impl Parser{
             return None;
         }
 
-        let mut args :Vec<Value> = iter_copy.filter(|s|{
-            s.starts_with("-I") ||
-            s.starts_with("-D")
-        }).map(|s| Value::String(s.to_string())).collect();
+        let mut args:Vec<Value> = Vec::new();
+        while let Some(s) = iter_copy.next() {
+            if s.eq("-I") || s.eq("-D"){
+                args.push(Value::String(s.to_owned() + iter_copy.next()?))
+            }else if s.starts_with("-I") || s.starts_with("-D") {
+                args.push(Value::String(s.to_string())); 
+            }
+        }
 
         let mut map = Map::new(); 
        

@@ -1,4 +1,4 @@
-gcc -c ./src/alloc.c ./src/dispatcher.c ./src/eventLoop.c ./src/filter.c ./src/hashMap.c ./src/internal.c ./src/lfqueue.c ./src/mem.c ./src/mempool.c ./src/report.c ./src/spinlock.c ./src/timer.c ./src/trait.c ./src/vertex.c -I./include/ -I. -g -fno-omit-frame-pointer -O0 -fdiagnostics-color=always  -funwind-tables  -Wall -Werror                       
+gcc -c ./src/alloc.c ./src/dispatcher.c ./src/eventLoop.c ./src/filter.c ./src/hashMap.c ./src/internal.c ./src/lfqueue.c ./src/mem.c ./src/mempool.c ./src/report.c ./src/spinlock.c ./src/timer.c ./src/trait.c ./src/vertex.c -I ./include/ -I . -g -fno-omit-frame-pointer -O0 -fdiagnostics-color=always  -funwind-tables  -Wall -Werror
 mv alloc.o dispatcher.o eventLoop.o filter.o hashMap.o internal.o lfqueue.o mem.o mempool.o report.o spinlock.o timer.o trait.o vertex.o ./objs/    
 ar rcsv libdlChecker.a ./objs/alloc.o ./objs/dispatcher.o ./objs/eventLoop.o ./objs/filter.o ./objs/hashMap.o ./objs/internal.o ./objs/lfqueue.o ./objs/mem.o ./objs/mempool.o ./objs/report.o ./objs/spinlock.o ./objs/timer.o ./objs/trait.o ./objs/vertex.o 
 r - ./objs/alloc.o
