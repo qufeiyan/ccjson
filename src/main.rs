@@ -1,4 +1,4 @@
-use ccjson::{reader::{FileReader, MockReader}, writer::Writer, parser};
+use ccjson::{parser, reader::{FileReader, StdinReader}, writer::Writer};
 use clap::Parser;
 
 /// Generate a compilation database for make-based build systems.
@@ -31,7 +31,7 @@ fn main() {
             ccjson::parser::Parser::new(Box::new(file), Some(args.directoy))
         },
         None => {
-            ccjson::parser::Parser::new(Box::new(MockReader()), Some("./".to_string()))   
+            ccjson::parser::Parser::new(Box::new(StdinReader::new()), Some(args.directoy))   
         }
     };
 

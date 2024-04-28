@@ -1,4 +1,4 @@
-use std::{fs::File, io::{BufReader, BufRead}};
+use std::{fs::File, io::{stdin, BufRead, BufReader, Stdin}};
 
 pub trait Reader {
     fn read_line(&mut self) -> Option<String>;
@@ -6,6 +6,7 @@ pub trait Reader {
 }
 
 pub struct StdinReader { 
+    reader: BufReader<Stdin>,
     eof: bool,
 
 }
@@ -52,11 +53,36 @@ impl Reader for FileReader{
     }        
 }
 
+impl StdinReader{
+    pub fn new() -> StdinReader{
+        StdinReader{
+            reader: BufReader::new(stdin()),
+            eof: false,
+        }
+    }
+}
+
 impl Reader for StdinReader{
     fn read_line(&mut self) -> Option<String> {
-        
-        None
+        let mut str = String::new();
+        let res = self.reader.read_line(&mut str);
+
+        let size = match res {
+            Ok(size) => size,
+            Err(e) => {
+                panic!("read line error: {:?}", e);
+            }
+        };
+
+        if size == 0{
+            self.eof = true;
+            ()
+        }
+
+        assert_eq!(size, str.len());
+        Some(str)    
     }
+ 
     fn readable(&self) -> bool {
         !self.eof   
     }
