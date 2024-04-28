@@ -24,13 +24,24 @@ reader --> parser --> writer
 
 ### 安装
 
-[todo:]()
+构建 `linux` 上可执行文件
+
+1. 使用 `rustup` 添加 `x86_64` 架构 `Linux`（基于 `Musl C` 库）的目标平台
+
+```bash
+rustup target add x86_64-unknown-linux-musl
+```
+2.  执行以下命令进行编译，生成适用于 Linux 的 release 版本可执行文件
+
+```bash
+cargo build --release --target x86_64-unknown-linux-musl
+```
 
 ### 使用
 
 安装后，使用 `ccjson` 命令输出`compile_commands.json` 文件
 
-~~1. 管道方式, 一边编译，一边生成~~
+1. 管道方式, 一边编译，一边生成
 
 ```bash
 $(make_script) | ccjson 
