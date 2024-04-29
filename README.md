@@ -26,15 +26,28 @@ reader --> parser --> writer
 
 构建 `linux` 上可执行文件
 
-1. 使用 `rustup` 添加 `x86_64` 架构 `Linux`（基于 `Musl C` 库）的目标平台
+1. 使用 `rustup` 添加 `x86_64` 架构 `linux`（基于 `musl c` 库）的目标平台
 
 ```bash
 rustup target add x86_64-unknown-linux-musl
 ```
-2.  执行以下命令进行编译，生成适用于 Linux 的 release 版本可执行文件
+2.  执行以下命令进行编译，生成适用于 `linux` 的 `release` 版本可执行文件
 
 ```bash
 cargo build --release --target x86_64-unknown-linux-musl
+```
+
+注意: 如果使用的是 `macos`, 还需要指定 `musl c` 的链接器，先安装交叉编译工具链
+
+```bash
+brew install FiloSottile/musl-cross/musl-cross
+```
+
+并在项目的 `.cargo/config.toml` 文件中指定 `musl` 链接器路径
+
+```bash
+[target.x86_64-unknown-linux-musl]
+linker = "x86_64-linux-musl-gcc"
 ```
 
 ### 使用
