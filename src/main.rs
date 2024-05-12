@@ -8,7 +8,7 @@ use tokio::sync::mpsc::channel;
     1. Support for redundent build systems that use shell scripts to nest make.
     2. Simpler to use than similiar tools without losing compilation information.
     3. Open source, you can modify it according to the actual build situation.\n
-    Check out at https://github.com/qufeiyan/ccjson for more details")]
+    Check out at https://github.com/qufeiyan/ccjson for more details.")]
 struct Args {
     /// Build log file to parse compilation commands from. (Default: stdin)"
     #[arg(short, long)]
