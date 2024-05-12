@@ -3,12 +3,12 @@ use std::{fs::{self, File}, io::Read};
 use ccjson::writer::Writer;
 
 
-#[test]
-fn test_write_content(){
-    let mut writer = Writer::new(Some(&"./tests/".to_string()), 1);
+#[tokio::test]
+async fn test_write_content(){
+    let mut writer = Writer::new(Some(&"./tests/".to_string()),1).await;
     let src_string = "hello, writer!!!";
 
-    writer.write(&src_string.to_string());
+    writer.write(&src_string.to_string()).await;
     
     let mut file = File::open("./tests/compile_commands.json").unwrap();
     let mut buffer = String::new();

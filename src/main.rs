@@ -1,5 +1,6 @@
-use ccjson::{parser, reader::{FileReader, StdinReader}, writer::Writer};
+use ccjson::{reader::{FileReader, Reader, StdinReader}, writer::Writer};
 use clap::Parser;
+use tokio::sync::mpsc::channel;
 
 /// Generate a compilation database for make-based build systems.
 #[derive(Parser, Debug)]
@@ -22,20 +23,21 @@ struct Args {
     output: String,
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let args = Args::parse();
 
-    let parser: parser::Parser = match args.parse {
+    let (tx, rx) = channel::<String>(10);
+    let reader: Box<dyn Reader> = match args.parse {
         Some(p) => {
-            let file: FileReader = FileReader::new(&p);
-            ccjson::parser::Parser::new(Box::new(file), Some(args.directoy))
+            Box::new(FileReader::new(&p, tx).await)
         },
         None => {
-            ccjson::parser::Parser::new(Box::new(StdinReader::new()), Some(args.directoy))   
+            Box::new(StdinReader::new(tx))
         }
     };
-
-    let writer = Writer::new(Some(&args.output), 256);
-    ccjson::run(parser, writer);
-
+    
+    let parser = ccjson::parser::Parser::new(rx, Some(args.directoy));
+    let writer = Writer::new(Some(&args.output), 256).await;
+    ccjson::run(reader, parser, writer).await;
 }

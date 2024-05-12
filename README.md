@@ -66,6 +66,26 @@ $(make_script) | ccjson
 ccjson -p $(build.log) -d $(build_dir)
 ```
 
+### 异步解析
 
+> v0.3.0 引入 tokio 库支持异步解析，基于同一个 build.log (千行) 进行性能测试, 对比数据如下
+
+| 解析方式 | real | user | system | 
+| ------------ | ------------ | ------------ | ------------ |
+| 同步解析 | 0.04s | 0.03s | 0.00s |
+| 异步解析 | 0.04s | 0.04s | 0.00s |
+
+实际测试结果表明，在千行日志以下，异步解析性能优势并不明显，甚至还不如同步。当然也可能是异步代码写的太烂的原因 :facepalm: 。
+
+
+### 参考
+
+- [clangd](https://clangd.github.io/)
+
+- [compile_commands.json](https://clangd.github.io/compilationDatabaseFormat/)
+
+- [rust-cli](https://github.com/rust-lang/rust-cli)
+
+- [rust-clap](https://github.com/clap-rs/clap)
 
 

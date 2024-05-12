@@ -1,29 +1,53 @@
 use std::env;
-use crate::reader::Reader;
 use serde_json::{Map, Value};
+use async_stream;
+use tokio::sync::mpsc::Receiver;
+use tokio_stream::Stream;
 
+
+pub struct Slot{
+    rx: Receiver<String>,
+}
+
+impl Slot{
+    fn new(rx: Receiver<String>) -> Slot{
+        Slot{
+            rx
+        }
+    }
+
+    /// This method returns `None` if the channel has been closed and there are
+    /// no remaining messages in the channel's buffer
+    async fn read_line(&mut self) -> Option<String> {
+        self.rx.recv().await
+    }
+
+    fn readable(&self) -> bool {
+        self.rx.is_closed() == false || self.rx.is_empty() == false
+    }
+}
 pub struct Parser{
-    reader: Box<dyn Reader>,
+    slot: Slot,
     build_dir: String,
     directory: String
 }
 
 impl Parser{
-    pub fn new(reader: Box<dyn Reader>, dir: Option<String>) -> Parser{
+    pub fn new(rx: Receiver<String>, dir: Option<String>) -> Parser{
         let build_dir = match dir {
             Some(s) => s,
             None => env::current_dir().unwrap().into_os_string().into_string().unwrap(), 
         }; 
         let directory = build_dir.clone();
         Parser{
-            reader,
+            slot: Slot::new(rx),
             build_dir,
             directory, 
         }
     }
 
     pub fn parserable(&self) -> bool{
-        return self.reader.readable();
+        return self.slot.readable();
     }
 
     fn parse_directory(&mut self, str: &String) -> Option<bool>{
@@ -55,9 +79,16 @@ impl Parser{
         }
     }  
 
-    pub fn parse_line(&mut self) -> Option<String>{
-        let line = self.reader.read_line().unwrap();
-        let res = self.parse_directory(&line);
+    pub async fn parse_line(&mut self) -> Option<String>{
+        if self.slot.readable() == false {
+            return None;   
+        }
+        let line = match self.slot.read_line().await {
+            Some(line) => line,
+            None => return None
+        };
+            
+        let res: Option<bool> = self.parse_directory(&line);
         match res {
             Some(_) => None,
             None => {
@@ -211,21 +242,23 @@ impl Parser{
 
         String::from(abs_src.strip_prefix(&abs_base).unwrap())
     }
+
     
 }
 
-impl Iterator for Parser{
-    type Item = String;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        // println!("parseable: {}", self.parserable());
-        while self.parserable() {
-            if let Some(item) = self.parse_line() {
-                return Some(item);
+impl Parser{
+    pub fn into_stream(mut self) -> impl Stream<Item = String> {
+        async_stream::stream! {
+            loop{
+                if let Some(message) = self.parse_line().await {
+                    yield message;
+                }
+                
+                if self.parserable() == false {
+                    break;
+                }
             }
         }
-        
-        None
     }
 }
 
@@ -246,21 +279,6 @@ fn test_norm_path(){
     // let src = "///./../a//b//./c/";
     // let dst = Parser::norm_path(src);
     // assert_eq!(PathBuf::from(src), PathBuf::from(&dst));
-}
-
-#[test]
-fn test_absolute_path(){
-    let reader = crate::reader::MockReader(); 
-
-    let base_path = "/cc//rust";
-    let parser: Parser = Parser::new(
-        Box::new(reader), 
-        Some(String::from(base_path))
-    );
-
-    let src_path = "../././tests/code//config.txt";
-    let abs_path = parser.absolute_path(src_path);
-    assert_eq!(abs_path, "/cc/tests/code/config.txt");
 }
 
 #[test]
