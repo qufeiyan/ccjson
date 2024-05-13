@@ -65,7 +65,7 @@ impl Parser{
                 false => res[0].to_string()
             }
         };
-        if str.contains("Make[1]") && str.contains("Entering directory") || str.contains("cd +"){
+        if str.contains("Make[1]") && str.contains("Entering directory") || str.contains("+ cd"){
             self.directory = get_directory(str).to_string();
             Some(true)
         }else if str.contains("Make[1]") && str.contains("Leaving directory"){
