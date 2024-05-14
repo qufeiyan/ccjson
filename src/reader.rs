@@ -1,4 +1,4 @@
-use std::{fs::File, io::{stdin, BufRead, BufReader, Stdin}};
+use std::{fs::File, io::{stdin, BufRead, BufReader, ErrorKind, Stdin}};
 
 pub trait Reader {
     fn read_line(&mut self) -> Option<String>;
@@ -8,13 +8,11 @@ pub trait Reader {
 pub struct StdinReader { 
     reader: BufReader<Stdin>,
     eof: bool,
-
 }
 
 pub struct FileReader {
     reader: BufReader<File>,
     eof: bool,
-    
 }
 
 impl FileReader {  
@@ -32,19 +30,22 @@ impl Reader for FileReader{
         let mut str = String::new();
         let res = self.reader.read_line(&mut str);
 
-        let size = match res {
-            Ok(size) => size,
-            Err(e) => {
+        match res {
+            Ok(size) => {
+                if size == 0 {
+                    self.eof = true;
+                    return None;
+                }
+            }
+            Err(e) => { 
+                // 输入了非法字符，比如非 utf-8 编码的字符
+                if let ErrorKind::InvalidData = e.kind() {
+                    return None;
+                }
                 panic!("read line error: {:?}", e);
             }
         };
-
-        if size == 0{
-            self.eof = true;
-            ()
-        }
-
-        assert_eq!(size, str.len());
+        
         Some(str)    
     }
 
@@ -67,19 +68,22 @@ impl Reader for StdinReader{
         let mut str = String::new();
         let res = self.reader.read_line(&mut str);
 
-        let size = match res {
-            Ok(size) => size,
-            Err(e) => {
+        match res {
+            Ok(size) => {
+                if size == 0 {
+                    self.eof = true;
+                    return None;
+                }
+            }
+            Err(e) => { 
+                // 输入了非法字符，比如非 utf-8 编码的字符
+                if let ErrorKind::InvalidData = e.kind() {
+                    return None;
+                }
                 panic!("read line error: {:?}", e);
             }
         };
-
-        if size == 0{
-            self.eof = true;
-            ()
-        }
-
-        assert_eq!(size, str.len());
+        
         Some(str)    
     }
  
