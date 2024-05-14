@@ -1,3 +1,5 @@
+use std::io::ErrorKind;
+
 pub(crate) use async_trait::async_trait;
 // use std::{fs::File, io::{stdin, BufRead, BufReader, Stdin}};
 use tokio::{
@@ -18,14 +20,12 @@ pub struct StdinReader {
     inner: Sender<String>, 
     reader: BufReader<Stdin>,
     eof: bool,
-
 }
 
 pub struct FileReader {
     inner: Sender<String>, 
     reader: BufReader<File>,
     eof: bool,
-    
 }
 
 impl FileReader {  
@@ -46,20 +46,22 @@ impl Reader for FileReader{
         let mut str = String::new();
 
         let res = self.reader.read_line(&mut str).await;
-        let size = match res {
-            Ok(size) => size,
-            Err(e) => {
+        match res {
+            Ok(size) => {
+                if size == 0 {
+                    self.eof = true;
+                    return None;
+                }
+            }
+            Err(e) => { 
+                // 输入了非法字符，比如非 utf-8 编码的字符
+                if let ErrorKind::InvalidData = e.kind() {
+                    return None;
+                }
                 panic!("read line error: {:?}", e);
             }
         };
-
-        if size == 0{
-            self.eof = true;
-            return None;
-        }
-
-        assert_eq!(size, str.len());
-
+        
         Some(str)    
     }
 
@@ -87,20 +89,23 @@ impl Reader for StdinReader{
     async fn read_line(&mut self) -> Option<String> {
         let mut str = String::new();
         let res = self.reader.read_line(&mut str).await;
-        let size = match res {
-            Ok(size) => size,
-            Err(e) => {
+
+        match res {
+            Ok(size) => {
+                if size == 0 {
+                    self.eof = true;
+                    return None;
+                }
+            }
+            Err(e) => { 
+                // 输入了非法字符，比如非 utf-8 编码的字符
+                if let ErrorKind::InvalidData = e.kind() {
+                    return None;
+                }
                 panic!("read line error: {:?}", e);
             }
         };
-
-        if size == 0{
-            self.eof = true;
-            return None;
-        }
-
-        assert_eq!(size, str.len());
-    
+        
         Some(str)    
     }
  
