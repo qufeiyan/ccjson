@@ -33,18 +33,18 @@ impl Writer{
     pub fn write(&mut self, str: &str){
         match str{
             "[\n" | "\n]" => { 
-                self.buffer.write(str.as_bytes()).unwrap();
+                self.buffer.write_all(str.as_bytes()).unwrap();
             }
             _ => {
                 if self.count > 1{ 
-                    self.buffer.write(b",\n").expect("Error: failed to write prefix."); 
+                    self.buffer.write_all(b",\n").expect("Error: failed to write prefix."); 
                 }
                 self.buffer.write_all(str.as_bytes()).expect("Error: failed to write content."); 
             }
         };
 
         let is_flush = self.items == 1 || self.items == (self.count % self.items) + 1;
-        if let true = is_flush{
+        if is_flush{
             self.flush();
         }else {
             self.count += 1;

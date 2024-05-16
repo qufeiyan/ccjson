@@ -5,8 +5,8 @@ pub mod writer;
 
 pub fn run(parser: parser::Parser, mut writer: writer::Writer){
     if !parser.parserable() {
-        ()
-    }    
+        return;
+    }
     
     writer.write("[\n");
     for items in parser{

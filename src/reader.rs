@@ -18,7 +18,7 @@ pub struct FileReader {
 impl FileReader {  
     pub fn new(filename: &String) -> FileReader{
         FileReader {
-            reader: BufReader::new(File::open(filename).expect(&format!("can't open {}", filename))),
+            reader: BufReader::new(File::open(filename).unwrap_or_else(|_| panic!("can't open {}", filename))),
             eof: false,
         }
     }
@@ -60,6 +60,12 @@ impl StdinReader{
             reader: BufReader::new(stdin()),
             eof: false,
         }
+    }
+}
+
+impl Default for StdinReader{
+    fn default() -> Self {
+        Self::new()
     }
 }
 
