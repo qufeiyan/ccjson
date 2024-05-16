@@ -31,9 +31,7 @@ pub struct FileReader {
 impl FileReader {  
     pub async fn new(filename: &String, sender: Sender<String>) -> FileReader{
         FileReader {
-            reader: {
-                BufReader::new(File::open(filename).await.expect(&format!("can't open {}", filename)))
-            },
+            reader: BufReader::new(File::open(filename).await.unwrap_or_else(|_| panic!("can't open {}", filename))),
             eof: false,
             inner: sender,
         }

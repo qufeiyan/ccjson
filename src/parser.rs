@@ -54,10 +54,10 @@ impl Parser{
         let get_directory = |str: &String| -> String{
             let strs = str.split_whitespace();
             let res: Vec<&str> = strs.into_iter()
-                .filter(|s| s.contains("'/") || s.starts_with("/"))
+                .filter(|s| s.contains("'/") || s.starts_with('/'))
                 .collect();
             assert_eq!(res.len(), 1);
-            match res[0].starts_with("'") {
+            match res[0].starts_with('\'') {
                 true => {
                     let len = res[0].len();
                     res[0][1..len-1].to_string()
@@ -113,8 +113,8 @@ impl Parser{
     /// let res = self.parser_command(&parser);
     /// 
     /// ``` 
-    fn parser_command(&mut self, str: &String) -> Option<String> {
-        let mut iter = str.split_whitespace().into_iter();
+    fn parser_command(&mut self, line_str: &str) -> Option<String> {
+        let mut iter = line_str.split_whitespace();
         let mut iter_copy = iter.clone();
 
         let res_cc = iter.find(|s|{
@@ -134,7 +134,7 @@ impl Parser{
             || s.ends_with(".cpp") 
             || s.ends_with("cxx")
         }).collect();
-        if files.len() == 0{
+        if files.is_empty(){
             return None;
         }
 
@@ -150,8 +150,8 @@ impl Parser{
         let mut map = Map::new(); 
        
         // directory: "~/..."
-        if let true = self.directory.is_empty(){
-            self.directory = self.build_dir.clone();
+        if self.directory.is_empty(){
+            self.directory.clone_from(&self.build_dir);
         }
         map.insert("directory".to_string(), Value::String(self.directory.clone()));
 
@@ -163,7 +163,7 @@ impl Parser{
         // file: "*.c" 
         let items: Vec<Map<String, Value>> = files.iter().map(|s|{
             let mut map = map.clone();
-            let abs_file = self.absolute_path(*s);
+            let abs_file = self.absolute_path(s);
             let file_val = Parser::relative_path(
                 // s,
                 &abs_file,
@@ -179,8 +179,8 @@ impl Parser{
     }
 
     fn norm_path(path: &str) -> String{
-        let path_items: Vec<_> = path.split("/").collect();
-        let initial_slashs = match path.starts_with("/") {
+        let path_items: Vec<_> = path.split('/').collect();
+        let initial_slashs = match path.starts_with('/') {
             true =>{
                 if path.starts_with("//") && !path.starts_with("///"){ 2 } else { 1 }
             },
@@ -217,8 +217,8 @@ impl Parser{
     fn absolute_path(&self, src_path: &str) -> String{
         let norm_src_path = Parser::norm_path(src_path);
         
-        if norm_src_path.starts_with("/"){
-            return String::from(norm_src_path);
+        if norm_src_path.starts_with('/'){
+            return norm_src_path;
         }
         
         match self.directory.as_str() {
@@ -226,8 +226,7 @@ impl Parser{
             _ => {
                 let mut norm_dir = Parser::norm_path(&self.directory);
                 let _ = &norm_dir.push('/');
-                let res = Parser::norm_path(&[norm_dir, norm_src_path].concat());
-                res
+                Parser::norm_path(&[norm_dir, norm_src_path].concat())
             }
         }
     }
@@ -236,7 +235,7 @@ impl Parser{
         let abs_src = Parser::norm_path(src_path);
         let mut abs_base = Parser::norm_path(base_path);
 
-        if !abs_base.ends_with("/"){
+        if !abs_base.ends_with('/'){
             abs_base.push('/');
         }
 
