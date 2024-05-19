@@ -1,4 +1,5 @@
-use std::env;
+use std::{env, fs, path};
+use crate::reader::Reader;
 use serde_json::{Map, Value};
 use async_stream;
 use tokio::sync::mpsc::Receiver;
@@ -35,7 +36,14 @@ pub struct Parser{
 impl Parser{
     pub fn new(rx: Receiver<String>, dir: Option<String>) -> Parser{
         let build_dir = match dir {
-            Some(s) => s,
+            Some(s) => {
+                if !s.starts_with('/'){
+                    // 判断 s 组成的路径是否存在，如果不存在，panic
+                    fs::canonicalize(path::Path::new(&s)).unwrap().to_str().unwrap().to_string()
+                }else {
+                    Parser::norm_path(&s)
+                }
+            }
             None => env::current_dir().unwrap().into_os_string().into_string().unwrap(), 
         }; 
         let directory = build_dir.clone();
@@ -267,17 +275,21 @@ fn test_norm_path(){
     let dst = Parser::norm_path(src);
     assert_eq!(std::path::PathBuf::from(src), std::path::PathBuf::from(&dst));
 
-    // let src = "/../a/./b/c//";
-    // let dst = Parser::norm_path(src);
-    // assert_eq!(PathBuf::from(src), PathBuf::from(&dst));
+    let src = "../a/./b/c//";
+    let dst = Parser::norm_path(src);
+    assert_eq!(std::path::PathBuf::from(src), std::path::PathBuf::from(&dst));
 
+    let src = "..///..";
+    let dst = Parser::norm_path(src);
+    assert_eq!(std::path::PathBuf::from(src), std::path::PathBuf::from(&dst));
+    
     // let src = "//./../a/../..//b/c/";
     // let dst = Parser::norm_path(src);
-    // assert_eq!(PathBuf::from(src), PathBuf::from(&dst));
+    // assert_eq!(std::path::PathBuf::from(src), std::path::PathBuf::from(&dst));
     
     // let src = "///./../a//b//./c/";
     // let dst = Parser::norm_path(src);
-    // assert_eq!(PathBuf::from(src), PathBuf::from(&dst));
+    // assert_eq!(std::path::PathBuf::from(src), std::path::PathBuf::from(&dst));
 }
 
 #[test]
@@ -286,4 +298,17 @@ fn test_relative_path(){
     let base_path = "../tests/./../tests";
 
     assert_eq!(Parser::relative_path(src_path, base_path), "code/config.txt");
+}
+
+#[test]
+fn test_parser_path(){
+    let file = crate::reader::FileReader::new(&String::from("./tests/build.log"));
+
+    let parser: Parser = Parser::new(
+        Box::new(file), 
+        Some(String::from("../"))
+    );
+
+    let src = Parser::norm_path(&[env::current_dir().unwrap().to_str().unwrap(), "/../"].concat());
+    assert_eq!(parser.directory, src); 
 }
