@@ -63,7 +63,11 @@ impl Parser{
     }  
 
     pub fn parse_line(&mut self) -> Option<String>{
-        let line = self.reader.read_line().unwrap();
+        let line = match self.reader.read_line() {
+            Some(line) => line,
+            None => return None,
+        };
+        
         let res = self.parse_directory(&line);
         match res {
             Some(_) => None,
