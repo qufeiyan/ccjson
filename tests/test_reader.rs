@@ -23,5 +23,7 @@ async fn test_readable(){
     assert_eq!(true, file.readable());
     file.read_line().await.unwrap();
     file.read_line().await.unwrap();
+    assert_eq!(true, file.readable());
+    file.read_line().await.unwrap();
     assert_eq!(false, file.readable());
 }

@@ -93,10 +93,10 @@ impl Parser{
         }
         let line = match self.slot.read_line().await {
             Some(line) => line,
-            None => return None
+            None => return None,
         };
-            
-        let res: Option<bool> = self.parse_directory(&line);
+        
+        let res = self.parse_directory(&line);
         match res {
             Some(_) => None,
             None => {
