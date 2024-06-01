@@ -90,7 +90,7 @@ impl Reader for StdinReader{
             }
         };
         
-        Some(str)    
+        Some(str)
     }
  
     fn readable(&self) -> bool {

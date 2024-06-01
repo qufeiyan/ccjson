@@ -147,7 +147,7 @@ impl Parser{
             let file_val = Parser::relative_path(
                 // s,
                 &abs_file,
-                &self.directory 
+                &self.build_dir 
             );
             map.insert("file".to_string(), Value::String(file_val));
             // println!("{:#?}", map);  
@@ -239,61 +239,106 @@ impl Iterator for Parser{
     }
 }
 
-#[test]
-fn test_norm_path(){
-    let src = "..//./../a//b/c/";
-    let dst = Parser::norm_path(src);
-    assert_eq!(std::path::PathBuf::from(src), std::path::PathBuf::from(&dst));
 
-    let src = "../a/./b/c//";
-    let dst = Parser::norm_path(src);
-    assert_eq!(std::path::PathBuf::from(src), std::path::PathBuf::from(&dst));
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    let src = "..///..";
-    let dst = Parser::norm_path(src);
-    assert_eq!(std::path::PathBuf::from(src), std::path::PathBuf::from(&dst));
-    
-    // let src = "//./../a/../..//b/c/";
-    // let dst = Parser::norm_path(src);
-    // assert_eq!(std::path::PathBuf::from(src), std::path::PathBuf::from(&dst));
-    
-    // let src = "///./../a//b//./c/";
-    // let dst = Parser::norm_path(src);
-    // assert_eq!(std::path::PathBuf::from(src), std::path::PathBuf::from(&dst));
-}
+    #[test]
+    fn test_parser_command() {
+        let reader = crate::reader::MockReader(); 
 
-#[test]
-fn test_absolute_path(){
-    let reader = crate::reader::MockReader(); 
+        let base_path = "/coder/build";
+        let mut parser: Parser = Parser::new(
+            Box::new(reader), 
+            Some(String::from(base_path))
+        );
 
-    let base_path = "/cc//rust";
-    let parser: Parser = Parser::new(
-        Box::new(reader), 
-        Some(String::from(base_path))
-    );
+        let test_cases = [
+            (
+                "gcc main.c -o main",
+                "[\n  {\n    \"arguments\": [\n      \"gcc\"\n    ],\n    \"directory\": \"/coder/build\",\n    \"file\": \"main.c\"\n  }\n]"
+            ),
+            (
+                "g++ main.cpp -o main -I/usr/include -DFLAG",
+                "[\n  {\n    \"arguments\": [\n      \"g++\",\n      \"-I/usr/include\",\n      \"-DFLAG\"\n    ],\n    \"directory\": \"/coder/build\",\n    \"file\": \"main.cpp\"\n  }\n]"
+            ),
+            (
+                "clang main.c -I/usr/include -DFLAG",
+                "[\n  {\n    \"arguments\": [\n      \"clang\",\n      \"-I/usr/include\",\n      \"-DFLAG\"\n    ],\n    \"directory\": \"/coder/build\",\n    \"file\": \"main.c\"\n  }\n]"
+            ),
+            (
+                "clang++ main.cxx -o main -DFLAG",
+                "[\n  {\n    \"arguments\": [\n      \"clang++\",\n      \"-DFLAG\"\n    ],\n    \"directory\": \"/coder/build\",\n    \"file\": \"main.cxx\"\n  }\n]"
+            ),
+            (
+                "gcc main.c -x c -E",
+                "[\n  {\n    \"arguments\": [\n      \"gcc\"\n    ],\n    \"directory\": \"/coder/build\",\n    \"file\": \"main.c\"\n  }\n]"
+            ),
+        ];
 
-    let src_path = "../././tests/code//config.txt";
-    let abs_path = parser.absolute_path(src_path);
-    assert_eq!(abs_path, "/cc/tests/code/config.txt");
-}
+        for (i, (input, expected)) in test_cases.iter().enumerate() {
+            let result = parser.parser_command(input);
+            assert_eq!(result, Some(expected.to_string()), "Test case {} failed", i);
+        }
+    }
 
-#[test]
-fn test_relative_path(){
-    let src_path = "../././tests/code//config.txt";
-    let base_path = "../tests/./../tests";
+    #[test]
+    fn test_norm_path(){
+        let src = "..//./../a//b/c/";
+        let dst = Parser::norm_path(src);
+        assert_eq!(std::path::PathBuf::from(src), std::path::PathBuf::from(&dst));
 
-    assert_eq!(Parser::relative_path(src_path, base_path), "code/config.txt");
-}
+        let src = "../a/./b/c//";
+        let dst = Parser::norm_path(src);
+        assert_eq!(std::path::PathBuf::from(src), std::path::PathBuf::from(&dst));
 
-#[test]
-fn test_parser_path(){
-    let file = crate::reader::FileReader::new(&String::from("./tests/build.log"));
+        let src = "..///..";
+        let dst = Parser::norm_path(src);
+        assert_eq!(std::path::PathBuf::from(src), std::path::PathBuf::from(&dst));
+        
+        // let src = "//./../a/../..//b/c/";
+        // let dst = Parser::norm_path(src);
+        // assert_eq!(std::path::PathBuf::from(src), std::path::PathBuf::from(&dst));
+        
+        // let src = "///./../a//b//./c/";
+        // let dst = Parser::norm_path(src);
+        // assert_eq!(std::path::PathBuf::from(src), std::path::PathBuf::from(&dst));
+    }
 
-    let parser: Parser = Parser::new(
-        Box::new(file), 
-        Some(String::from("../"))
-    );
+    #[test]
+    fn test_absolute_path(){
+        let reader = crate::reader::MockReader(); 
 
-    let src = Parser::norm_path(&[env::current_dir().unwrap().to_str().unwrap(), "/../"].concat());
-    assert_eq!(parser.directory, src); 
+        let base_path = "/cc//rust";
+        let parser: Parser = Parser::new(
+            Box::new(reader), 
+            Some(String::from(base_path))
+        );
+
+        let src_path = "../././tests/code//config.txt";
+        let abs_path = parser.absolute_path(src_path);
+        assert_eq!(abs_path, "/cc/tests/code/config.txt");
+    }
+
+    #[test]
+    fn test_relative_path(){
+        let src_path = "../././tests/code//config.txt";
+        let base_path = "../tests/./../tests";
+
+        assert_eq!(Parser::relative_path(src_path, base_path), "code/config.txt");
+    }
+
+    #[test]
+    fn test_parser_path(){
+        let file = crate::reader::FileReader::new(&String::from("./tests/build.log"));
+
+        let parser: Parser = Parser::new(
+            Box::new(file), 
+            Some(String::from("../"))
+        );
+
+        let src = Parser::norm_path(&[env::current_dir().unwrap().to_str().unwrap(), "/../"].concat());
+        assert_eq!(parser.directory, src); 
+    }
 }
