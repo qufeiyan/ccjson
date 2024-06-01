@@ -104,7 +104,7 @@ impl Reader for StdinReader{
             }
         };
         
-        Some(str)    
+        Some(str)
     }
  
     async fn notify(&self, line: String) {
