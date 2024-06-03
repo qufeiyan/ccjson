@@ -59,6 +59,7 @@ linker = "x86_64-linux-musl-gcc"
 ```bash
 $(make_script) | ccjson 
 ```
+> 如果是非标准的 `make` 构建系统，比如 `shell` 里面使用 `cd` 去切换编译目录，而非嵌套 `make` 命令，则需要使用 `sh -x $(build.sh)` 命令来显式输出 `cd` 操作，以便能捕捉到当前编译单元的所在目录。即 `sh -x $(build.sh) | ccjson`
 
 2. 读取编译日志
 
