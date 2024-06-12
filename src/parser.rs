@@ -124,34 +124,60 @@ impl Parser{
     fn parser_command(&mut self, line_str: &str) -> Option<String> {
         let mut iter = line_str.split_whitespace();
         let mut iter_copy = iter.clone();
-
-        let res_cc = iter.find(|s|{
-            s.ends_with("gcc") 
-            || s.ends_with("g++") 
-            || s.ends_with("clang")
-            || s.ends_with("clang++")
-        });
+        macro_rules! find_target {
+            ($s:expr, $($t:expr), *) => {{
+                $($s.ends_with($t)) || *
+            }};
+        }
+        let find_cc = |s: &str| -> bool {
+            find_target!(s, "gcc", "g++", "clang", "clang++")
+        };
+        let find_src = |s: &str| -> bool {
+            find_target!(s, ".c", ".cc", ".cpp", ".cxx")
+        };
+        let find_obj = |s: &str| -> bool {
+            find_target!(s, ".o", ".obj")
+        };
+        
+        let res_cc = iter.find(|s| find_cc(s) );
         let cc = match res_cc {
             Some(cc) => cc,
             None => return  None
         };
 
-        let files: Vec<&str> = iter.filter(|s|{
-            s.ends_with(".c") 
-            || s.ends_with(".cc") 
-            || s.ends_with(".cpp") 
-            || s.ends_with("cxx")
-        }).collect();
+        let files: Vec<&str> = iter.filter(|s| find_src(s) ).collect();
         if files.is_empty(){
             return None;
         }
 
         let mut args:Vec<Value> = Vec::new();
         while let Some(s) = iter_copy.next() {
-            if s.eq("-I") || s.eq("-D"){
-                args.push(Value::String(s.to_owned() + iter_copy.next()?))
-            }else if s.starts_with("-I") || s.starts_with("-D") {
-                args.push(Value::String(s.to_string())); 
+            if s.starts_with("-I") {
+                let target = match s.eq("-I") {
+                    true => s.to_owned() + &Parser::relative_path(
+                        &self.absolute_path(iter_copy.next()?),
+                        &self.build_dir
+                    ), 
+                    false => s.split_at(2).0.to_owned() + &Parser::relative_path(
+                        &self.absolute_path(s.split_at(2).1), 
+                        &self.build_dir
+                    ) 
+                };
+                args.push(Value::String(target));
+            }else if s.starts_with("-D") {
+                let target = match s.eq("-D") {
+                    true => s.to_owned() + iter_copy.next()?,
+                    false => s.to_string()
+                };
+                args.push(Value::String(target)); 
+            }else if find_obj(s) {
+                let abs_file = self.absolute_path(s);
+                args.push(Value::String(Parser::relative_path(
+                    &abs_file,
+                    &self.build_dir
+                )));
+            }else if !find_src(s) && !find_cc(s) {
+                args.push(Value::String(s.to_string()));
             }
         }
 
@@ -161,22 +187,24 @@ impl Parser{
         if self.directory.is_empty(){
             self.directory.clone_from(&self.build_dir);
         }
-        map.insert("directory".to_string(), Value::String(self.directory.clone()));
+        map.insert("directory".to_string(), Value::String(self.build_dir.clone()));
 
         // arguments: "-I... -D..."
         args.insert(0, Value::String(cc.to_string()));
-        let value_args = Value::Array(args);
-        map.insert("arguments".to_string(), value_args);
 
         // file: "*.c" 
         let items: Vec<Map<String, Value>> = files.iter().map(|s|{
             let mut map = map.clone();
+            let mut args_copy = args.clone();
             let abs_file = self.absolute_path(s);
             let file_val = Parser::relative_path(
                 // s,
                 &abs_file,
                 &self.build_dir 
             );
+            args_copy.push(Value::String(file_val.clone()));
+            let value_args = Value::Array(args_copy);
+            map.insert("arguments".to_string(), value_args);
             map.insert("file".to_string(), Value::String(file_val));
             // println!("{:#?}", map);  
             map
@@ -246,8 +274,13 @@ impl Parser{
         if !abs_base.ends_with('/'){
             abs_base.push('/');
         }
-
-        String::from(abs_src.strip_prefix(&abs_base).unwrap())
+        
+        match abs_src.strip_prefix(&abs_base) {
+            None => return ".".to_owned(),
+            Some(s) => {
+                s.to_owned()
+            }
+        }
     }
 
     
@@ -357,6 +390,11 @@ mod tests {
         let base_path = "../tests/./../tests";
 
         assert_eq!(Parser::relative_path(src_path, base_path), "code/config.txt");
+        // assert_eq!(Parser::relative_path("/", "/"), ".");
+        assert_eq!(Parser::relative_path("/a/b/c", "/a/b/c"), ".");
+        assert_eq!(Parser::relative_path("/a/b/c", "/a/b/d"), "../d");
+        assert_eq!(Parser::relative_path("/a/b/c", "/a/c/d"), "../../c/d");
+        assert_eq!(Parser::relative_path("/a/b/c", "/b/c/d"), "../../../b/c/d");
     }
 
     #[test]
@@ -371,6 +409,24 @@ mod tests {
         let src = Parser::norm_path(&[env::current_dir().unwrap().to_str().unwrap(), "/../"].concat());
         assert_eq!(parser.directory, src); 
     }
+
+    macro_rules! find_target {
+        ($s:expr, $($t:expr), *) => {{
+            $($s.ends_with($t)) || *
+        }};
+    }
+    
+    #[test]
+    fn test_find_target() {
+        assert_eq!(find_target!("hello", "world!"), false);
+        assert_eq!(find_target!("hello world", "world"), true);
+        assert_eq!(find_target!("hello world", "world!"), false);
+        assert_eq!(find_target!("hello world", "hello"), false);
+        assert_eq!(find_target!("hello", "planet"), false);
+        assert_eq!(find_target!("hello", "world", "planet"), false);
+        assert_eq!(find_target!("hello", "world", "planet", "universe"), false);
+        assert_eq!(find_target!("hello, world", "world", "planet", "universe", "multiverse"), true);   
+     }
 }
 
 #[test]

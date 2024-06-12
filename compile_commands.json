@@ -1,0 +1,279 @@
+[
+  {
+    "arguments": [
+      "gcc",
+      "-c",
+      "-Iinclude",
+      "-I.",
+      "-g",
+      "-fno-omit-frame-pointer",
+      "-O0",
+      "-fdiagnostics-color=always",
+      "-funwind-tables",
+      "-Wall",
+      "-Werror",
+      "src/alloc.c"
+    ],
+    "directory": "/Users/zhaojielei/coder/dlChecker",
+    "file": "src/alloc.c"
+  },
+  {
+    "arguments": [
+      "gcc",
+      "-c",
+      "-Iinclude",
+      "-I.",
+      "-g",
+      "-fno-omit-frame-pointer",
+      "-O0",
+      "-fdiagnostics-color=always",
+      "-funwind-tables",
+      "-Wall",
+      "-Werror",
+      "src/dispatcher.c"
+    ],
+    "directory": "/Users/zhaojielei/coder/dlChecker",
+    "file": "src/dispatcher.c"
+  },
+  {
+    "arguments": [
+      "gcc",
+      "-c",
+      "-Iinclude",
+      "-I.",
+      "-g",
+      "-fno-omit-frame-pointer",
+      "-O0",
+      "-fdiagnostics-color=always",
+      "-funwind-tables",
+      "-Wall",
+      "-Werror",
+      "src/eventLoop.c"
+    ],
+    "directory": "/Users/zhaojielei/coder/dlChecker",
+    "file": "src/eventLoop.c"
+  },
+  {
+    "arguments": [
+      "gcc",
+      "-c",
+      "-Iinclude",
+      "-I.",
+      "-g",
+      "-fno-omit-frame-pointer",
+      "-O0",
+      "-fdiagnostics-color=always",
+      "-funwind-tables",
+      "-Wall",
+      "-Werror",
+      "src/filter.c"
+    ],
+    "directory": "/Users/zhaojielei/coder/dlChecker",
+    "file": "src/filter.c"
+  },
+  {
+    "arguments": [
+      "gcc",
+      "-c",
+      "-Iinclude",
+      "-I.",
+      "-g",
+      "-fno-omit-frame-pointer",
+      "-O0",
+      "-fdiagnostics-color=always",
+      "-funwind-tables",
+      "-Wall",
+      "-Werror",
+      "src/hashMap.c"
+    ],
+    "directory": "/Users/zhaojielei/coder/dlChecker",
+    "file": "src/hashMap.c"
+  },
+  {
+    "arguments": [
+      "gcc",
+      "-c",
+      "-Iinclude",
+      "-I.",
+      "-g",
+      "-fno-omit-frame-pointer",
+      "-O0",
+      "-fdiagnostics-color=always",
+      "-funwind-tables",
+      "-Wall",
+      "-Werror",
+      "src/internal.c"
+    ],
+    "directory": "/Users/zhaojielei/coder/dlChecker",
+    "file": "src/internal.c"
+  },
+  {
+    "arguments": [
+      "gcc",
+      "-c",
+      "-Iinclude",
+      "-I.",
+      "-g",
+      "-fno-omit-frame-pointer",
+      "-O0",
+      "-fdiagnostics-color=always",
+      "-funwind-tables",
+      "-Wall",
+      "-Werror",
+      "src/lfqueue.c"
+    ],
+    "directory": "/Users/zhaojielei/coder/dlChecker",
+    "file": "src/lfqueue.c"
+  },
+  {
+    "arguments": [
+      "gcc",
+      "-c",
+      "-Iinclude",
+      "-I.",
+      "-g",
+      "-fno-omit-frame-pointer",
+      "-O0",
+      "-fdiagnostics-color=always",
+      "-funwind-tables",
+      "-Wall",
+      "-Werror",
+      "src/mem.c"
+    ],
+    "directory": "/Users/zhaojielei/coder/dlChecker",
+    "file": "src/mem.c"
+  },
+  {
+    "arguments": [
+      "gcc",
+      "-c",
+      "-Iinclude",
+      "-I.",
+      "-g",
+      "-fno-omit-frame-pointer",
+      "-O0",
+      "-fdiagnostics-color=always",
+      "-funwind-tables",
+      "-Wall",
+      "-Werror",
+      "src/mempool.c"
+    ],
+    "directory": "/Users/zhaojielei/coder/dlChecker",
+    "file": "src/mempool.c"
+  },
+  {
+    "arguments": [
+      "gcc",
+      "-c",
+      "-Iinclude",
+      "-I.",
+      "-g",
+      "-fno-omit-frame-pointer",
+      "-O0",
+      "-fdiagnostics-color=always",
+      "-funwind-tables",
+      "-Wall",
+      "-Werror",
+      "src/report.c"
+    ],
+    "directory": "/Users/zhaojielei/coder/dlChecker",
+    "file": "src/report.c"
+  },
+  {
+    "arguments": [
+      "gcc",
+      "-c",
+      "-Iinclude",
+      "-I.",
+      "-g",
+      "-fno-omit-frame-pointer",
+      "-O0",
+      "-fdiagnostics-color=always",
+      "-funwind-tables",
+      "-Wall",
+      "-Werror",
+      "src/spinlock.c"
+    ],
+    "directory": "/Users/zhaojielei/coder/dlChecker",
+    "file": "src/spinlock.c"
+  },
+  {
+    "arguments": [
+      "gcc",
+      "-c",
+      "-Iinclude",
+      "-I.",
+      "-g",
+      "-fno-omit-frame-pointer",
+      "-O0",
+      "-fdiagnostics-color=always",
+      "-funwind-tables",
+      "-Wall",
+      "-Werror",
+      "src/timer.c"
+    ],
+    "directory": "/Users/zhaojielei/coder/dlChecker",
+    "file": "src/timer.c"
+  },
+  {
+    "arguments": [
+      "gcc",
+      "-c",
+      "-Iinclude",
+      "-I.",
+      "-g",
+      "-fno-omit-frame-pointer",
+      "-O0",
+      "-fdiagnostics-color=always",
+      "-funwind-tables",
+      "-Wall",
+      "-Werror",
+      "src/trait.c"
+    ],
+    "directory": "/Users/zhaojielei/coder/dlChecker",
+    "file": "src/trait.c"
+  },
+  {
+    "arguments": [
+      "gcc",
+      "-c",
+      "-Iinclude",
+      "-I.",
+      "-g",
+      "-fno-omit-frame-pointer",
+      "-O0",
+      "-fdiagnostics-color=always",
+      "-funwind-tables",
+      "-Wall",
+      "-Werror",
+      "src/vertex.c"
+    ],
+    "directory": "/Users/zhaojielei/coder/dlChecker",
+    "file": "src/vertex.c"
+  },
+  {
+    "arguments": [
+      "gcc",
+      "-Tmem.lds",
+      "libdlChecker.a",
+      "-Iinclude",
+      "-I.",
+      "-lpthread",
+      "-ldl",
+      "-L.",
+      "-ldlChecker",
+      "-g",
+      "-fno-omit-frame-pointer",
+      "-O0",
+      "-fdiagnostics-color=always",
+      "-funwind-tables",
+      "-Wall",
+      "-Werror",
+      "-o",
+      "demo",
+      "demo.c"
+    ],
+    "directory": "/Users/zhaojielei/coder/dlChecker",
+    "file": "demo.c"
+  }
+]
