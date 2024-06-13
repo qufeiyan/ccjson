@@ -1,4 +1,4 @@
-use std::{env, fs, path};
+use std::{env, fs, path::{self, Path}};
 use crate::reader::Reader;
 use serde_json::{Map, Value};
 use async_stream;
@@ -269,21 +269,54 @@ impl Parser{
 
     fn relative_path(src_path: &str, base_path: &str) -> String{
         let abs_src = Parser::norm_path(src_path);
-        let mut abs_base = Parser::norm_path(base_path);
+        let abs_base = Parser::norm_path(base_path);
 
-        if !abs_base.ends_with('/'){
-            abs_base.push('/');
+        let base_path  = Path::new(&abs_base);
+        let src_path  = Path::new(&abs_src);
+
+        if let Ok(target) = src_path.strip_prefix(base_path) {
+            match target.to_str() == Some("") {
+                true => return ".".to_string(),
+                false => return target.to_str().unwrap().to_string()
+            }
+        } 
+
+        let mut base_components = base_path.components();
+        let mut src_components = src_path.components();
+        if base_components.next() != src_components.next(){
+            return abs_src;
         }
-        
-        match abs_src.strip_prefix(&abs_base) {
-            None => return ".".to_owned(),
-            Some(s) => {
-                s.to_owned()
+        let mut rel_path = String::new();
+        let mut first = String::new();
+        while let (Some(base_component), Some(src_component)) =  (base_components.next(), src_components.next()) {
+            if base_component != src_component {
+                rel_path.push_str("../");
+                first.push_str(src_component.as_os_str().to_str().unwrap());
+                break;
             }
         }
-    }
 
-    
+        for _ in base_components {
+            rel_path.push_str("../");
+        }
+
+        if !first.is_empty(){
+            rel_path.push_str(&first);
+            rel_path.push('/');
+        }
+
+        for component in src_components {
+            rel_path.push_str(component.as_os_str().to_str().unwrap());
+            rel_path.push('/');
+        }
+
+        if rel_path.is_empty() {
+            rel_path.push('.');
+        }else {
+            rel_path.pop();
+        }
+        rel_path
+    }
 }
 
 impl Parser{
@@ -386,15 +419,13 @@ mod tests {
 
     #[test]
     fn test_relative_path(){
-        let src_path = "../././tests/code//config.txt";
-        let base_path = "../tests/./../tests";
-
-        assert_eq!(Parser::relative_path(src_path, base_path), "code/config.txt");
-        // assert_eq!(Parser::relative_path("/", "/"), ".");
+        assert_eq!(Parser::relative_path("/", "/"), ".");
+        assert_eq!(Parser::relative_path("/a/b/c/d/e/f", "/a/b/c"), "d/e/f");
+        assert_eq!(Parser::relative_path("/a/b/c/d/e/f.cc", "/a/b/c"), "d/e/f.cc");
         assert_eq!(Parser::relative_path("/a/b/c", "/a/b/c"), ".");
-        assert_eq!(Parser::relative_path("/a/b/c", "/a/b/d"), "../d");
-        assert_eq!(Parser::relative_path("/a/b/c", "/a/c/d"), "../../c/d");
-        assert_eq!(Parser::relative_path("/a/b/c", "/b/c/d"), "../../../b/c/d");
+        assert_eq!(Parser::relative_path("/a/b/c", "/a/b/d"), "../c");
+        assert_eq!(Parser::relative_path("/a/b/c", "/a/c/d"), "../../b/c");
+        assert_eq!(Parser::relative_path("/a/b/c", "/b/c/d"), "../../../a/b/c");
     }
 
     #[test]

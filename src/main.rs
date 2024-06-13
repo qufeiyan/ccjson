@@ -4,11 +4,16 @@ use tokio::sync::mpsc::channel;
 
 /// Generate a compilation database for make-based build systems.
 #[derive(Parser, Debug)]
-#[command(version, about, long_about = "Features:\n
+#[command(version, about, long_about = "Features:
+    -------------------------------------------------------------------
     1. Support for redundent build systems that use shell scripts to nest make.
     2. Simpler to use than similiar tools without losing compilation information.
-    3. Open source, you can modify it according to the actual build situation.\n
-    Check out at https://github.com/qufeiyan/ccjson for more details.")]
+    3. Open source, you can modify it according to the actual build situation.
+    -------------------------------------------------------------------
+    | Recommended usage: sh -x ${build.sh} | ${ccjson} -d ${build_dir} |
+    -------------------------------------------------------------------
+    Check out at https://github.com/qufeiyan/ccjson for more details"
+)]
 struct Args {
     /// Build log file to parse compilation commands from. (Default: stdin)"
     #[arg(short, long)]
