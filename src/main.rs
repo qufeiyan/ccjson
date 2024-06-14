@@ -10,7 +10,9 @@ use tokio::sync::mpsc::channel;
     2. Simpler to use than similiar tools without losing compilation information.
     3. Open source, you can modify it according to the actual build situation.
     -------------------------------------------------------------------
-    | Recommended usage: sh -x ${build.sh} | ${ccjson} -d ${build_dir} |
+   | Recommended usage:                                                |
+   | 1. sh -x ${build.sh} | ${ccjson} -d ${build_dir}                  |
+   | 2. ${ccjson} -p ${build.log} -d ${build_dir}                      |
     -------------------------------------------------------------------
     Check out at https://github.com/qufeiyan/ccjson for more details"
 )]
