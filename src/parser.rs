@@ -324,23 +324,23 @@ mod tests {
         let test_cases = [
             (
                 "gcc main.c -o main",
-                "[\n  {\n    \"arguments\": [\n      \"gcc\"\n    ],\n    \"directory\": \"/coder/build\",\n    \"file\": \"main.c\"\n  }\n]"
+                "[\n  {\n    \"arguments\": [\n      \"gcc\",\n      \"-o\",\n      \"main\",\n      \"main.c\"\n    ],\n    \"directory\": \"/coder/build\",\n    \"file\": \"main.c\"\n  }\n]"
             ),
             (
                 "g++ main.cpp -o main -I/usr/include -DFLAG",
-                "[\n  {\n    \"arguments\": [\n      \"g++\",\n      \"-I/usr/include\",\n      \"-DFLAG\"\n    ],\n    \"directory\": \"/coder/build\",\n    \"file\": \"main.cpp\"\n  }\n]"
+                "[\n  {\n    \"arguments\": [\n      \"g++\",\n      \"-o\",\n      \"main\",\n      \"-I../../usr/include\",\n      \"-DFLAG\",\n      \"main.cpp\"\n    ],\n    \"directory\": \"/coder/build\",\n    \"file\": \"main.cpp\"\n  }\n]"
             ),
             (
                 "clang main.c -I/usr/include -DFLAG",
-                "[\n  {\n    \"arguments\": [\n      \"clang\",\n      \"-I/usr/include\",\n      \"-DFLAG\"\n    ],\n    \"directory\": \"/coder/build\",\n    \"file\": \"main.c\"\n  }\n]"
+                "[\n  {\n    \"arguments\": [\n      \"clang\",\n      \"-I../../usr/include\",\n      \"-DFLAG\",\n      \"main.c\"\n    ],\n    \"directory\": \"/coder/build\",\n    \"file\": \"main.c\"\n  }\n]"
             ),
             (
                 "clang++ main.cxx -o main -DFLAG",
-                "[\n  {\n    \"arguments\": [\n      \"clang++\",\n      \"-DFLAG\"\n    ],\n    \"directory\": \"/coder/build\",\n    \"file\": \"main.cxx\"\n  }\n]"
+                "[\n  {\n    \"arguments\": [\n      \"clang++\",\n      \"-o\",\n      \"main\",\n      \"-DFLAG\",\n      \"main.cxx\"\n    ],\n    \"directory\": \"/coder/build\",\n    \"file\": \"main.cxx\"\n  }\n]"
             ),
             (
                 "gcc main.c -x c -E",
-                "[\n  {\n    \"arguments\": [\n      \"gcc\"\n    ],\n    \"directory\": \"/coder/build\",\n    \"file\": \"main.c\"\n  }\n]"
+                "[\n  {\n    \"arguments\": [\n      \"gcc\",\n      \"-x\",\n      \"c\",\n      \"-E\",\n      \"main.c\"\n    ],\n    \"directory\": \"/coder/build\",\n    \"file\": \"main.c\"\n  }\n]"
             ),
         ];
 
