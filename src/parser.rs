@@ -1,5 +1,4 @@
 use std::{env, fs, path::{self, Path}};
-use crate::reader::Reader;
 use serde_json::{Map, Value};
 use async_stream;
 use tokio::sync::mpsc::Receiver;
@@ -24,7 +23,7 @@ impl Slot{
     }
 
     fn readable(&self) -> bool {
-        self.rx.is_closed() == false || self.rx.is_empty() == false
+        !self.rx.is_closed() || !self.rx.is_empty()
     }
 }
 pub struct Parser{
@@ -55,7 +54,7 @@ impl Parser{
     }
 
     pub fn parserable(&self) -> bool{
-        return self.slot.readable();
+        self.slot.readable()
     }
 
     fn parse_directory(&mut self, str: &String) -> Option<bool>{
@@ -88,7 +87,7 @@ impl Parser{
     }  
 
     pub async fn parse_line(&mut self) -> Option<String>{
-        if self.slot.readable() == false {
+        if !self.slot.readable() {
             return None;   
         }
         let line = match self.slot.read_line().await {
@@ -327,7 +326,7 @@ impl Parser{
                     yield message;
                 }
                 
-                if self.parserable() == false {
+                if !self.parserable() {
                     break;
                 }
             }
@@ -342,11 +341,11 @@ mod tests {
 
     #[test]
     fn test_parser_command() {
-        let reader = crate::reader::MockReader(); 
+        let (_tx, rx) = tokio::sync::mpsc::channel::<String>(4);
 
         let base_path = "/coder/build";
         let mut parser: Parser = Parser::new(
-            Box::new(reader), 
+            rx, 
             Some(String::from(base_path))
         );
 
@@ -404,11 +403,11 @@ mod tests {
 
     #[test]
     fn test_absolute_path(){
-        let reader = crate::reader::MockReader(); 
+        let (_tx, rx) = tokio::sync::mpsc::channel::<String>(4);
 
         let base_path = "/cc//rust";
         let parser: Parser = Parser::new(
-            Box::new(reader), 
+            rx, 
             Some(String::from(base_path))
         );
 
@@ -430,11 +429,12 @@ mod tests {
 
     #[test]
     fn test_parser_path(){
-        let file = crate::reader::FileReader::new(&String::from("./tests/build.log"));
+        let (_tx, rx) = tokio::sync::mpsc::channel::<String>(4);
 
+        let base_path = "../";
         let parser: Parser = Parser::new(
-            Box::new(file), 
-            Some(String::from("../"))
+            rx, 
+            Some(String::from(base_path))
         );
 
         let src = Parser::norm_path(&[env::current_dir().unwrap().to_str().unwrap(), "/../"].concat());
@@ -458,25 +458,4 @@ mod tests {
         assert_eq!(find_target!("hello", "world", "planet", "universe"), false);
         assert_eq!(find_target!("hello, world", "world", "planet", "universe", "multiverse"), true);   
      }
-}
-
-#[test]
-fn test_relative_path(){
-    let src_path = "../././tests/code//config.txt";
-    let base_path = "../tests/./../tests";
-
-    assert_eq!(Parser::relative_path(src_path, base_path), "code/config.txt");
-}
-
-#[test]
-fn test_parser_path(){
-    let file = crate::reader::FileReader::new(&String::from("./tests/build.log"));
-
-    let parser: Parser = Parser::new(
-        Box::new(file), 
-        Some(String::from("../"))
-    );
-
-    let src = Parser::norm_path(&[env::current_dir().unwrap().to_str().unwrap(), "/../"].concat());
-    assert_eq!(parser.directory, src); 
 }

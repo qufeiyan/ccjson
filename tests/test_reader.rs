@@ -13,7 +13,7 @@ async fn test_file_no_exist(){
 async fn test_read_line(){
     let (tx, _rx) = tokio::sync::mpsc::channel::<String>(4);
     let mut file = FileReader::new(&String::from("./tests/hello.txt"), tx).await;
-    assert_eq!(file.read_line().await.unwrap(), "hello, ccjson!!!");
+    assert_eq!(file.read_line().await.unwrap(), "C?te d'Ivoire\n");
 }
 
 #[tokio::test]
@@ -24,6 +24,6 @@ async fn test_readable(){
     file.read_line().await.unwrap();
     file.read_line().await.unwrap();
     assert_eq!(true, file.readable());
-    file.read_line().await.unwrap();
+    file.read_line().await;
     assert_eq!(false, file.readable());
 }

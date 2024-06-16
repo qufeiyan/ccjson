@@ -121,6 +121,12 @@ pub struct MockReader{
     inner: Sender<String>
 }
 
+impl MockReader {
+    pub fn new(inner: Sender<String>) -> Self {
+        MockReader { inner }
+    }
+}
+
 #[async_trait]
 impl Reader for MockReader{
     async fn read_line(&mut self) -> Option<String> {
