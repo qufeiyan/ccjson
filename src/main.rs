@@ -27,6 +27,10 @@ struct Args {
     /// Specifies the directory for compile_commands.json.
     #[arg(short, long, default_value_t = String::from("./"))]
     output: String,
+
+    /// Specifies the command strings instead of arguments list for the compile_commands.json.
+    #[arg(short, long)]
+    command: bool,
 }
 
 fn main() {
@@ -35,10 +39,10 @@ fn main() {
     let parser: parser::Parser = match args.parse {
         Some(p) => {
             let file: FileReader = FileReader::new(&p);
-            ccjson::parser::Parser::new(Box::new(file), Some(args.directoy))
+            ccjson::parser::Parser::new(Box::new(file), Some(args.directoy), args.command)
         },
         None => {
-            ccjson::parser::Parser::new(Box::new(StdinReader::new()), Some(args.directoy))   
+            ccjson::parser::Parser::new(Box::new(StdinReader::new()), Some(args.directoy), args.command)
         }
     };
 

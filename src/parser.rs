@@ -1,15 +1,16 @@
-use std::{env, fs, path::{self, Path}};
+use std::{env, fs, path::{self, Path, PathBuf}};
 use crate::reader::Reader;
 use serde_json::{Map, Value};
 
 pub struct Parser{
     reader: Box<dyn Reader>,
     build_dir: String,
-    directory: String
+    directory: String,
+    is_cmd: bool,
 }
 
 impl Parser{
-    pub fn new(reader: Box<dyn Reader>, dir: Option<String>) -> Parser{
+    pub fn new(reader: Box<dyn Reader>, dir: Option<String>, is_cmd: bool) -> Parser{
         let build_dir = match dir {
             Some(s) => {
                 if !s.starts_with('/'){
@@ -26,6 +27,7 @@ impl Parser{
             reader,
             build_dir,
             directory, 
+            is_cmd
         }
     }
 
@@ -167,16 +169,33 @@ impl Parser{
         // file: "*.c" 
         let items: Vec<Map<String, Value>> = files.iter().map(|s|{
             let mut map = map.clone();
-            let mut args_copy = args.clone();
             let abs_file = self.absolute_path(s);
             let file_val = Parser::relative_path(
                 // s,
                 &abs_file,
                 &self.build_dir 
             );
-            args_copy.push(Value::String(file_val.clone()));
-            let value_args = Value::Array(args_copy);
-            map.insert("arguments".to_string(), value_args);
+
+            if !self.is_cmd {
+                let mut args_copy = args.clone();
+                args_copy.push(Value::String(file_val.clone()));
+                let value_args = Value::Array(args_copy);
+                map.insert("arguments".to_string(), value_args);
+            }else {
+                let cmd_vec = args.iter().map(
+                    |s| s.as_str().expect("arguments should be string")
+                ).collect::<Vec<&str>>();
+                let cmd = cmd_vec.join(" ");
+                map.insert("command".to_string(), Value::String(cmd));
+                map.insert("output".to_string(), Value::String(
+                    PathBuf::from(&file_val)
+                    .with_extension("o")
+                    .to_str()
+                    .expect("output file should be string")
+                    .to_string()
+                ));
+            } 
+            
             map.insert("file".to_string(), Value::String(file_val));
             // println!("{:#?}", map);  
             map
