@@ -6,7 +6,8 @@ fn test_parseable(){
 
     let mut parser: parser::Parser = parser::Parser::new(
         Box::new(file), 
-        Some(String::from("./"))
+        Some(String::from("./")),
+        true
     );
 
     assert_eq!(parser.parserable(), true);
@@ -21,7 +22,8 @@ fn test_parse_line(){
 
     let parser: parser::Parser = parser::Parser::new(
         Box::new(file), 
-        Some(String::from("./"))
+        Some(String::from("./")),
+        true,
     );
 
     // parser.next();

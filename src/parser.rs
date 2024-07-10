@@ -337,7 +337,8 @@ mod tests {
         let base_path = "/coder/build";
         let mut parser: Parser = Parser::new(
             Box::new(reader), 
-            Some(String::from(base_path))
+            Some(String::from(base_path)),
+            false
         );
 
         let test_cases = [
@@ -399,7 +400,8 @@ mod tests {
         let base_path = "/cc//rust";
         let parser: Parser = Parser::new(
             Box::new(reader), 
-            Some(String::from(base_path))
+            Some(String::from(base_path)),
+            false,
         );
 
         let src_path = "../././tests/code//config.txt";
@@ -424,7 +426,8 @@ mod tests {
 
         let parser: Parser = Parser::new(
             Box::new(file), 
-            Some(String::from("../"))
+            Some(String::from("../")),
+            false
         );
 
         let src = Parser::norm_path(&[env::current_dir().unwrap().to_str().unwrap(), "/../"].concat());
