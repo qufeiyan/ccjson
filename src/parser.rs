@@ -1,4 +1,4 @@
-use std::{env, fs, path::{self, Path, PathBuf}};
+use std::{env, fs, io::{self, Write}, path::{self, Path, PathBuf}};
 use crate::reader::Reader;
 use serde_json::{Map, Value};
 
@@ -74,9 +74,43 @@ impl Parser{
         match res {
             Some(_) => None,
             None => {
+                self.parse_warning_or_error(&line);
                 let res = self.parser_command(&line)?;
                 Some(res)
             }
+        }
+    }
+    
+    /// Parses a single line of GCC output to identify and print warnings or errors.
+    ///
+    /// # Arguments
+    ///
+    /// * `line` - A string slice that holds a single line of GCC compiler output.
+    /// 
+    fn parse_warning_or_error(&self, line: &String) {
+        let pattern = regex::Regex::new(r"^(.*?):(\d+):(\d+):\s+(error|warning):\s+(.+)\n$").unwrap();
+        let caps = pattern.captures(line);
+
+        match caps {
+            Some(caps) => {
+                let file = caps.get(1).unwrap().as_str();
+                let line_num = caps.get(2).unwrap().as_str();
+                let column_num = caps.get(3).unwrap().as_str();
+                let level = caps.get(4).unwrap().as_str();
+                let msg = caps.get(5).unwrap().as_str();
+
+                let file = Parser::relative_path(
+                    &self.absolute_path(file),
+                    &self.build_dir
+                );
+                
+                let stderr = io::stderr();
+                let mut handle = stderr.lock();
+                handle.write_all(
+                    format!("{}:{}:{}: {}: {}", file, line_num, column_num, level, msg).as_bytes()
+                ).unwrap(); 
+            }
+            None => (),
         }
     }
 
@@ -207,7 +241,7 @@ impl Parser{
 
     fn norm_path(path: &str) -> String{
         let path_items: Vec<_> = path.split('/').collect();
-        let initial_slashs = match path.starts_with('/') {
+        let initial_slashs: usize = match path.starts_with('/') {
             true =>{
                 if path.starts_with("//") && !path.starts_with("///"){ 2 } else { 1 }
             },
